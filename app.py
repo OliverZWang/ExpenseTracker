@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request
+import requests
 
 app = Flask(__name__)
 
@@ -14,8 +15,8 @@ def privacy():
     return 'Privacy Policy will be posted here.'
 
 
-@app.route('/webhook')
-def webhook():
+@app.route('/webhook', methods=['GET'])
+def webhook_get():
     mode = request.args.get('hub.mode')
     token = request.args.get('hub.verify_token')
     challenge = request.args.get('hub.challenge', '')
@@ -24,12 +25,44 @@ def webhook():
         if mode == 'subscribe' and token == os.environ.get('VERIFY_TOKEN', 'DEFAULT_VERIFY_TOKEN'):
             print('WEBHOOK_VERIFIED')
             
-            return challenge, 200
+            return challenge
         
         else:
             return '403 Forbidden', 403
     
     return 'Miss hub.mode or hub.verify_token', 403
+
+
+@app.route('/webhook', methods=['POST'])
+def webhook_post():
+    body = request.get_json()
+    
+    if body["object"] == "page":
+        for entry in body["entry"]:
+            for webhookEvent in entry['messaging']:
+                print(webhookEvent)
+                
+                sid = webhookEvent['sender']['id']
+                
+                send_message(sid, 'Test!')
+            
+        return 'EVENT_RECEIVED'
+    
+    return '404 Not Found', 404
+
+
+def send_message(rid, msg):
+    r = requests.post(
+        'https://graph.facebook.com/v6.0/me/messages?access_token=' + os.environ.get('ACCESS_TOKEN', 'DEFAULT_VERIFY_TOKEN'), 
+        json = {
+            'recipient': {
+                'id': rid
+            },
+            'message': {
+                'text': msg
+            }
+        },
+        headers = {'Content-type': 'application/json'})
 
 
 if __name__ == '__main__':
