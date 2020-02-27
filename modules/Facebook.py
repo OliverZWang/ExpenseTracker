@@ -17,10 +17,10 @@ def get_user(uid):
         return False, results['error'], ''
     else:
         return True, results['first_name'], results['last_name']
-        
     
 
 if __name__ == '__main__':
     status, first_name, last_name = get_user('3545504232158581')
     
     print(status, first_name, last_name)
+    
