@@ -7,7 +7,7 @@ class Db:
         
         client = pymongo.MongoClient(db_uri)
         
-        db = client.get_default_database()
+        self.db = client.get_default_database()
     
-    
-db = Db()
+
+db = Db().db
