@@ -45,6 +45,8 @@ def webhook_post():
         for entry in body["entry"]:
             for webhookEvent in entry['messaging']:
                 
+                print(webhookEvent)
+                
                 uid = webhookEvent['sender']['id']
                 
                 user = User(uid)
