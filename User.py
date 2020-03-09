@@ -12,7 +12,7 @@ class User:
         user = user_collection.find_one({'uid': uid})
         
         if user is None:
-            status, first_name, last_name = Facebook.get_user('3545504232158581')
+            status, first_name, last_name = Facebook.get_user(uid)
             
             if status:
                 user_collection.insert_one({

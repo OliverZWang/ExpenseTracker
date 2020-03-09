@@ -2,6 +2,8 @@ import os
 from flask import Flask, request
 import requests
 
+from User import User
+
 app = Flask(__name__)
 
 
@@ -40,9 +42,10 @@ def webhook_post():
     if body["object"] == "page":
         for entry in body["entry"]:
             for webhookEvent in entry['messaging']:
-                print(webhookEvent)
                 
                 sid = webhookEvent['sender']['id']
+                
+                user = User(sid)
                 
                 send_message(sid, 'Test!')
             
