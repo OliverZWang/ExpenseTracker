@@ -62,18 +62,6 @@ def webhook_post():
     return '404 Not Found', 404
 
 
-def send_message(rid, msg):
-    r = requests.post(
-        'https://graph.facebook.com/v6.0/me/messages?access_token=' + os.environ.get('ACCESS_TOKEN', 'DEFAULT_VERIFY_TOKEN'), 
-        json = {
-            'recipient': {
-                'id': rid
-            },
-            'message': {
-                'text': msg
-            }
-        },
-        headers = {'Content-type': 'application/json'})
 
 
 if __name__ == '__main__':

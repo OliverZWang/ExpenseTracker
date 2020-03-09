@@ -18,17 +18,20 @@ class User:
                 user_collection.insert_one({
                     'uid': uid,
                     'first_name': first_name,
-                    'last_name': last_name
+                    'last_name': last_name,
+                    'user_status': "new"
                 })
                 
                 self.uid = uid
                 self.first_name = first_name
                 self.last_name = last_name
+                self.user_status = "new"
                 
         else:
             self.uid = uid
             self.first_name = user['first_name']
             self.last_name = user['last_name']
+            self.user_status = user['user_status']
             
             
     def __str__(self):
