@@ -3,9 +3,11 @@ from flask import Flask, request
 import requests
 
 from User import User
+from methods import *
 
 app = Flask(__name__)
 
+method_list = [check_newuser, catch_all]
 
 @app.route('/')
 def main():
@@ -43,11 +45,15 @@ def webhook_post():
         for entry in body["entry"]:
             for webhookEvent in entry['messaging']:
                 
-                sid = webhookEvent['sender']['id']
+                uid = webhookEvent['sender']['id']
                 
-                user = User(sid)
+                user = User(uid)
                 
-                send_message(sid, 'Test!')
+                for method in method_list:
+                    if (!method(user, "")):
+                        break
+                
+                # send_message(sid, 'Test!')
             
         return 'EVENT_RECEIVED'
     
