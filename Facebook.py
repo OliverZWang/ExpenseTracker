@@ -18,24 +18,17 @@ def get_user(uid):
     else:
         return True, results['first_name'], results['last_name']
     
-def send_message(uid, msg, quick_replies=None, message_type=None):
-	json_data = {
+def send_message(uid, msg):
+    r = requests.post(
+        'https://graph.facebook.com/v6.0/me/messages?access_token=' + os.environ.get('ACCESS_TOKEN', 'DEFAULT_VERIFY_TOKEN'), 
+        json = {
             'recipient': {
                 'id': uid
             },
             'message': {
                 'text': msg
-            }}
-	if quick_replies is not None:
-		json_data['message']['quick_replies'] = quick_replies
-		# print(json_data)
-	if message_type is not None:
-		json_data['message_type'] = message_type
-
-
-	r = requests.post(
-        'https://graph.facebook.com/v6.0/me/messages?access_token=' + os.environ.get('ACCESS_TOKEN', 'DEFAULT_VERIFY_TOKEN'), 
-        json = json_data,
+            }
+        },
         headers = {'Content-type': 'application/json'})
 
 if __name__ == '__main__':
