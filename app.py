@@ -26,9 +26,7 @@ def webhook_get():
     challenge = request.args.get('hub.challenge', '')
     
     if mode and token:
-        if mode == 'subscribe' and token == os.environ.get('VERIFY_TOKEN', 'DEFAULT_VERIFY_TOKEN'):
-            print('WEBHOOK_VERIFIED')
-            
+        if mode == 'subscribe' and token == os.environ.get('VERIFY_TOKEN', 'DEFAULT_VERIFY_TOKEN'):            
             return challenge
         
         else:
@@ -58,8 +56,6 @@ def webhook_post():
         return 'EVENT_RECEIVED'
     
     return '404 Not Found', 404
-
-
 
 
 if __name__ == '__main__':

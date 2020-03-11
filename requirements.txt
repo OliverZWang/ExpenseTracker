@@ -13,3 +13,4 @@ urllib3==1.25.8
 virtualenv==16.0.0
 Werkzeug==1.0.0
 gunicorn
+dnspython
