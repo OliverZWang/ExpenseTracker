@@ -42,7 +42,8 @@ class User:
         db.users.update({'uid': self.uid}, {"$set": {'first_name': self.first_name, 
                                                      'last_name': self.last_name,
                                                      'user_status': self.user_status}})
-
+    def add_total(self, total):
+        db.budgets.update({'uid': self.uid}, {"$set": {'total': total, 'left': total}})
 
     def get_budgets(self):
         if 'budgets' not in db.list_collection_names():
