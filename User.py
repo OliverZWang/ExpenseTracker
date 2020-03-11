@@ -39,7 +39,7 @@ class User:
     
     def save(self):
         # This is not good for large data
-        db.users.update({'uid', self.uid}, {"$set": {'first_name': self.first_name, 
+        db.users.update({'uid': self.uid}, {"$set": {'first_name': self.first_name, 
                                                      'last_name': self.last_name,
                                                      'user_status': self.user_status}})
 

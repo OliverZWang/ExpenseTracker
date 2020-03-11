@@ -7,7 +7,7 @@ from methods import *
 
 app = Flask(__name__)
 
-method_list = [check_new_user, catch_all]
+method_list = [check_new_user, give_intro, catch_all]
 
 @app.route('/')
 def main():
@@ -50,7 +50,7 @@ def webhook_post():
                 user = User(uid)
                 
                 for method in method_list:
-                    if (not method(user, "")):
+                    if (not method(user, webhookEvent['message']['text'])):
                         break
             
         return 'EVENT_RECEIVED'
