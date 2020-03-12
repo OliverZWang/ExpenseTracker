@@ -50,8 +50,10 @@ def webhook_post():
                 user = User(uid)
                 
                 for method in method_list:
-                    if (not method(user, webhookEvent)):
-                        break
+                    if method(user, webhookEvent):
+                        continue
+
+                    break
             
         return 'EVENT_RECEIVED'
     
