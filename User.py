@@ -35,15 +35,12 @@ class User:
             self.first_name = user['first_name']
             self.last_name = user['last_name']
             self.user_status = user['user_status']
-            
-    
+
     def save(self):
         # This is not good for large data
         db.users.update({'uid': self.uid}, {"$set": {'first_name': self.first_name, 
                                                      'last_name': self.last_name,
                                                      'user_status': self.user_status}})
-    def add_total(self, total):
-        db.budgets.update({'uid': self.uid}, {"$set": {'total': total, 'left': total}})
 
     def get_budgets(self):
         if 'budgets' not in db.list_collection_names():
@@ -60,7 +57,6 @@ class User:
 
         return results
 
-
     def add_budgets(self, from_date, to_date, total):
         # from_date and to_date should be datetime.date(YYYY, MM, DD)
         if 'budgets' not in db.list_collection_names():
@@ -75,12 +71,13 @@ class User:
             'total': total,
             'left': total
         })
-        
-        
+
+    def add_total(self, total):
+        db.budgets.update({'uid': self.uid}, {"$set": {'total': total, 'left': total}})
+
     def __str__(self):
         return 'User[{}, {}, {}, {}]'.format(self.uid, self.first_name, self.last_name, self.user_status)
-    
-    
+
     def __repr__(self):
         return 'User({})'.format(self.uid)
         

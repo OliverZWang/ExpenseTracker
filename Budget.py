@@ -1,5 +1,5 @@
 import datetime
-
+from Db import db
 
 class Budget:
     def __init__(self, _id, user, from_date, to_date, total, left):
@@ -14,6 +14,12 @@ class Budget:
         self.from_date = datetime.date(int(from_date[0]), int(from_date[1]), int(from_date[2]))
         self.to_date = datetime.date(int(to_date[0]), int(to_date[1]), int(to_date[2]))
 
+    def save(self):
+        db.budgets.update({'_id': self._id}, {'$set': {'uid': self.user.uid,
+                                                       'from_date': self.from_date.strftime('%Y-%m-%d'),
+                                                        'to_date': self.to_date.strftime('%Y-%m-%d'),
+                                                        'total': self.total,
+                                                        'left': self.total}})
 
     def __str__(self):
         return "Budget[{}, {}, {}, {}, {}]".format(self.user.uid, self.from_date, self.to_date, self.total, self.left)
