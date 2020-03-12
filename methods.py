@@ -107,6 +107,7 @@ def ask_for_amount(user, webhookEvent):
         to_date = today + period
         # print(to_date)
         user.add_budgets(today, to_date, -1)
+
         Facebook.send_message(user.uid,
                               "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]),
                               )
@@ -119,9 +120,14 @@ def set_amount(user, webhookEvent):
     if webhookEvent['message']['text'].find('$') >= 0:
         total = float(webhookEvent['message']['text'][1:])
         # print(total)
-        user.add_total(total)
-        Facebook.send_message(user.uid,
-                              "Saved")
+
+        budget = user.get_budgets()[-1]
+        budget.total = total
+        budget.left = total
+
+        budget.save()
+
+        Facebook.send_message(user.uid, "Saved")
 
 
 def catch_all(user, webhookEvent):
