@@ -88,45 +88,11 @@ def get_length(user, webhookEvent):
 
 def catch_long_request(user, webhookEvent):
     if webhookEvent['message']['text'].lower().find("longer time") >= 0:
-        quick_replies = [
-            {
-                "content_type": "text",
-                "title": "3 days",
-                "payload": "valid_len",
-                # "image_url":""
-            },
-            {
-                "content_type": "text",
-                "title": "5 days",
-                "payload": "valid_len",
-                # "image_url":""
-            },
-            {
-                "content_type": "text",
-                "title": "1 week",
-                "payload": "valid_len",
-                # "image_url":""
-            },
-            {
-                "content_type": "text",
-                "title": "2 weeks",
-                "payload": "valid_len",
-                # "image_url":""
-            },
-            {
-                "content_type": "text",
-                "title": "A Longer Time? ",
-                "payload": "valid_len",
-                # "image_url":""
-            }
-        ]
+        Facebook.send_message(user.uid, "Nope")
 
-        Facebook.send_message(user.uid,
-                              "Nope",
-                              quick_replies=quick_replies)
-        return False
-    else:
-        return True
+        webhookEvent['message']['text'] = 'get started'
+
+    return True
 
 
 def ask_for_amount(user, webhookEvent):
