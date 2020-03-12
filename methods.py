@@ -10,14 +10,14 @@ def check_new_user(user, webhookEvent):
                 "content_type": "text",
                 "title": "What is this?",
                 "payload": "<POSTBACK_PAYLOAD>",
-                # "image_url":""
+                "image_url":"https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/facebook/230/thinking-face_1f914.png"
             }
         ]
 
         Facebook.send_message(user.uid, "Welcome!", quick_replies=quick_replies)
 
         # Change Status from "New" to something else in DB
-        user.user_status = "returning"
+        user.user_status = "not_in_budget_cycle"
         user.save()
         print("User Status Saved: {}".format(user.user_status))
         return False
@@ -109,26 +109,58 @@ def ask_for_amount(user, webhookEvent):
         user.add_budgets(today, to_date, -1)
 
         Facebook.send_message(user.uid,
-                              "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]),
-                              )
+                              "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]))
         return False
     else:
         return True
 
 
 def set_amount(user, webhookEvent):
-    if webhookEvent['message']['text'].find('$') >= 0:
+    if user.user_status == "not_in_budget_cycle" and webhookEvent['message']['text'].find('$') >= 0:
         total = float(webhookEvent['message']['text'][1:])
         # print(total)
 
         budget = user.get_budgets()[-1]
         budget.total = total
         budget.left = total
-
         budget.save()
+
+        user.user_status = "in_budget_cycle"
+        user.save()
 
         Facebook.send_message(user.uid, "Saved")
 
+        return False
+
 
 def catch_all(user, webhookEvent):
-    Facebook.send_message(user.uid, "Sorry, I don't understand. ")
+    Facebook.send_message(user.uid, "Sorry, I don't understand \"{}\". ".format(webhookEvent['message']['text']))
+
+    if user.status == "in_budget_cycle":
+        quick_replies = [
+            {
+                "content_type": "text",
+                "title": "What should I do next?",
+                "payload": "whats_next",
+                "image_url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/facebook/230/thinking-face_1f914.png"
+            },
+            {
+                "content_type": "text",
+                "title": "Report a spending",
+                "payload": "report",
+                "image_url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/facebook/230/money-with-wings_1f4b8.png"
+            }
+        ]
+    else:
+        quick_replies = [
+            {
+                "content_type": "text",
+                "title": "What is this?",
+                "payload": "whats_this",
+                "image_url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/facebook/230/thinking-face_1f914.png"
+            }
+        ]
+
+    Facebook.send_message(user.uid, "Please choose from one of the options below.", quick_replies=quick_replies)
+
+    return False
