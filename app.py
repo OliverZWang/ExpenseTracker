@@ -52,7 +52,7 @@ def webhook_post():
                 for method in method_list:
                     if method(user, webhookEvent):
                         continue
-
+                    print("Got here")
                     break
             
         return 'EVENT_RECEIVED'
