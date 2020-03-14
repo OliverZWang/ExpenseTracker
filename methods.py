@@ -133,7 +133,7 @@ def ask_for_amount(user, webhookEvent):
             period = datetime.timedelta(days=int(length[0]))
         to_date = today + period
         # print(to_date)
-        user.add_budgets(today, to_date, -1)
+        user.add_budget(today, to_date, -1)
 
         Facebook.send_message(user.uid,
                               "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]))
@@ -168,16 +168,43 @@ def set_amount(user, webhookEvent):
     else:
         return True
 
-def initiate_report(user, webhookEvent): 
-    # For now, the user has to enter exactly "Report Spending: <amount>"
-    if user.user_status == "in_budget_cycle" and webhookEvent['message']['text'].lower().find('report spending:') >= 0:
-        input_report = webhookEvent['message']['text']
-        amount = float(input_report.split(':')[1])
-        user.update_left(amount)
-        Facebook.send_message(user.uid, "Recorded.")
+
+def initiate_report(user, webhookEvent):
+    debug('initiate_report', 'start')
+
+    # For now, the user has to enter exactly "$<amount>"
+    if user.user_status == "in_budget_cycle" and webhookEvent['message']['text'].find('$') >= 0:
+        amount = float(webhookEvent['message']['text'][1:])
+
+        current_budget = user.get_budgets()[-1]
+
+        current_budget.addTransaction(amount, '')
+
+        days_left = (current_budget.to_date - datetime.datetime.date(datetime.datetime.now())).days
+
+        if current_budget.left > 0:
+            Facebook.send_message(user.uid,
+                                  'Thanks for letting me know. You have ${} left for {} day(s). That\'s ${} per day.'.format(
+                                      current_budget.left, days_left, current_budget.left / days_left
+                                  ))
+
+        else:
+            Facebook.send_message(user.uid,
+                                  'You have spent all the money for this period, there are {} day(s) left. '.format(
+                                      days_left
+                                  )
+                                  + 'Better be more careful next time.')
+
+            user.user_status = 'not_in_budget_cycle'
+            user.save()
+
+        debug('initiate_report', 'end false')
         return False
-    else: 
+    else:
+
+        debug('initiate_report', 'end true')
         return True
+
 
 def catch_all(user, webhookEvent):
     debug('catch_all', 'start')
@@ -208,7 +235,6 @@ def catch_all(user, webhookEvent):
                 "image_url": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/facebook/230/thinking-face_1f914.png"
             }
         ]
-
 
     Facebook.send_message(user.uid, "Please choose from one of the options below.", quick_replies=quick_replies)
 

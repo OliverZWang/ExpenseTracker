@@ -17,10 +17,8 @@ class Transaction:
 
         self.time = datetime.datetime(date[0], date[1], date[2], time[0], time[1], time[2])
 
-
     def __str__(self):
         return "Transaction[{}, {}, {}, {}, {}]".format(self.user.uid, self.budget._id, self.time, self.amount, self.category)
-
 
     def __repr__(self):
         return 'Transaction({})'.format(self._id)
