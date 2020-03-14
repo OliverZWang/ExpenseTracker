@@ -75,6 +75,11 @@ class User:
     def add_total(self, total):
         db.budgets.update({'uid': self.uid}, {"$set": {'total': total, 'left': total}})
 
+    def update_left(self, spending):
+        current_budget = self.get_budgets()[-1]
+        new_left = current_budget.left - spending
+        db.budgets.update({'uid': self.uid}, {"$set": {'left': new_left}})
+
     def __str__(self):
         return 'User[{}, {}, {}, {}]'.format(self.uid, self.first_name, self.last_name, self.user_status)
 
