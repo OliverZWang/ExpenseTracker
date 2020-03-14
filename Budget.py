@@ -20,7 +20,7 @@ class Budget:
                                                        'from_date': self.from_date.strftime('%Y-%m-%d'),
                                                        'to_date': self.to_date.strftime('%Y-%m-%d'),
                                                        'total': self.total,
-                                                       'left': self.total}})
+                                                       'left': self.left}})
 
     def addTransaction(self, amount, category):
         transaction_collection = db.transactions
