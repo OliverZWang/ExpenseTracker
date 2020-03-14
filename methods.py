@@ -121,7 +121,7 @@ def catch_long_request(user, webhookEvent):
 def ask_for_amount(user, webhookEvent):
     debug('ask_for_amount', 'start')
 
-    if user.user_status == "not_in_budget_cycle" and webhookEvent['message']['text'].lower().find('week') >= 0 or webhookEvent['message']['text'].lower().find('day') >= 0:
+    if user.user_status != "in_budget_cycle" and webhookEvent['message']['text'].lower().find('week') >= 0 or webhookEvent['message']['text'].lower().find('day') >= 0:
         # print("Enter ask_for_amount")
 
         length = webhookEvent['message']['text'].split(' ')
@@ -148,7 +148,7 @@ def ask_for_amount(user, webhookEvent):
 def set_amount(user, webhookEvent):
     debug('set_amount', 'start')
 
-    if user.user_status == "not_in_budget_cycle" and webhookEvent['message']['text'].find('$') >= 0:
+    if user.user_status != "in_budget_cycle" and webhookEvent['message']['text'].find('$') >= 0:
         # print("Enter set_amount")
         total = float(webhookEvent['message']['text'][1:])
         # print(total)
