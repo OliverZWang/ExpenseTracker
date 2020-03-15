@@ -1,13 +1,15 @@
-import os
 from flask import Flask, request
-import requests
 
+import Facebook
 from User import User
 from methods import *
+from Db import db
 
 app = Flask(__name__)
 
-method_list = [check_new_user, give_intro, catch_long_request, get_length, ask_for_amount, set_amount, initiate_report, catch_all]
+method_list = [check_new_user, give_intro, catch_long_request, get_length, ask_for_amount,
+               set_amount, initiate_report, catch_all]
+
 
 @app.route('/')
 def main():
@@ -56,6 +58,69 @@ def webhook_post():
         return 'EVENT_RECEIVED'
     
     return '404 Not Found', 404
+
+
+@app.route('/cron')
+def cron():
+    # 0 reminder, 1 daily reporter
+    cron_type = request.args.get('type')
+
+    user_collection = db.users
+
+    users = user_collection.find({'user_status': 'in_budget_cycle'}, {'uid': 1})
+
+    if cron_type == '0':
+        debug('cron', 'start reminder')
+
+        for tmp in users:
+            user = User(tmp['uid'])
+
+            budget = user.get_budgets()[-1]
+
+            if len(budget.getTransaction(today=True)) == 0:
+                quick_replies = [
+                    {
+                        "content_type": "text",
+                        "title": "Yes, I spent nothing today.",
+                        "payload": "spent_nothing"
+                    },
+                    {
+                        "content_type": "text",
+                        "title": "No, I will report now!",
+                        "payload": "report_now"
+                    }
+                ]
+
+                Facebook.send_message(user.uid,
+                                      "Hey {}, I noticed that you have not reported any spending today. ".format(user.first_name)
+                                      + "Did you actually spend nothing today?", quick_replies=quick_replies)
+
+        debug('cron', 'end reminder')
+
+    elif cron_type == '1':
+        debug('cron', 'start reporter')
+
+        for tmp in users:
+            user = User(tmp['uid'])
+
+            budget = user.get_budgets()[-1]
+
+            transactions = budget.getTransaction(today=True)
+
+            total = 0
+
+            for tran in transactions:
+                total += tran.amount
+
+            days_left = (budget.to_date - datetime.datetime.date(datetime.datetime.now())).days - 1
+
+            Facebook.send_message(user.uid,
+                                  "You have spent ${} today. ".format(total)
+                                  + "You have ${} left for this period, that's ${} per day.".format(budget.left, budget / days_left))
+
+        debug('cron', 'end reporter')
+    else:
+        warning('cron', 'Unknown cron type: ' + cron_type)
 
 
 if __name__ == '__main__':
