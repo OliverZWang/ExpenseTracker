@@ -1,6 +1,8 @@
 import datetime
 from Db import db
 
+from Transaction import Transaction
+
 
 class Budget:
     def __init__(self, _id, user, from_date, to_date, total, left):
@@ -36,6 +38,26 @@ class Budget:
         self.left -= amount
 
         self.save()
+
+    def getTransaction(self, today=False):
+        transaction_collection = db.transactions
+
+        if today:
+            date = datetime.datetime.date(datetime.datetime.now())
+            transactions = transaction_collection.find({'bid': self._id,
+                                                        'time': {'$gte': '{}/{:02d}/{:02d} 00:00:00'.format(date.year, date.month, date.day),
+                                                                 '$lte': '{}/{:02d}/{:02d} 23:59:59'.format(date.year, date.month, date.day)}})
+        else:
+            transactions = transaction_collection.find({'bid': self._id})
+
+        results = []
+
+        for tmp in transactions:
+            transaction = Transaction(tmp['_id'], self.user, self, tmp['time'], tmp['amount'], tmp['category'])
+
+            results.append(transaction)
+
+        return results
 
     def __str__(self):
         return "Budget[{}, {}, {}, {}, {}]".format(self.user.uid, self.from_date, self.to_date, self.total, self.left)

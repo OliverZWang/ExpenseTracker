@@ -12,10 +12,10 @@ class Transaction:
         self.category = category
 
         time = time.split(' ')
-        date = time[0].split('-')
+        date = time[0].split('/')
         time = time[1].split(':')
 
-        self.time = datetime.datetime(date[0], date[1], date[2], time[0], time[1], time[2])
+        self.time = datetime.datetime(int(date[0]), int(date[1]), int(date[2]), int(time[0]), int(time[1]), int(time[2]))
 
     def __str__(self):
         return "Transaction[{}, {}, {}, {}, {}]".format(self.user.uid, self.budget._id, self.time, self.amount, self.category)
