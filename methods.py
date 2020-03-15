@@ -35,7 +35,7 @@ def check_new_user(user, webhookEvent):
 def give_intro(user, webhookEvent):
     debug('give_intro', 'start')
 
-    if webhookEvent['message']['text'].find('What is this') >= 0:
+    if webhookEvent['message']['text'].lower().find('What is this') >= 0:
         # print("Enter give_intro")
         quick_replies = [
             {
@@ -58,8 +58,8 @@ def give_intro(user, webhookEvent):
 
 def get_length(user, webhookEvent):
     debug('get_length', 'start')
-
-    if webhookEvent['message']['text'].lower().find('get started') >= 0:
+    # TO DO: reply differently if user is in_budget_cycle
+    if (user.user_status == "finished_budget_cycle") or webhookEvent['message']['text'].lower().find('get started') >= 0:
         # print("Enter get_length")
         quick_replies = [
             {
@@ -93,11 +93,16 @@ def get_length(user, webhookEvent):
                 # "image_url":""
             }
         ]
-
-        Facebook.send_message(user.uid,
+        if user.user_status != "in_budget_cycle":
+            Facebook.send_message(user.uid,
                               "How long is your next budget period?",
                               quick_replies=quick_replies)
-
+            if user.user_status == "finished_budget_cycle":
+                user.user_status = "initiated_budge_cycle"
+                user.save()
+        else:
+            Facebook.send_message(user.uid,
+                              "Welcome back! Please begin your report with a dollar sign.")
         debug('get_length', 'end false')
         return False
     else:
@@ -107,7 +112,7 @@ def get_length(user, webhookEvent):
 
 def catch_long_request(user, webhookEvent):
     debug('catch_long_request', 'start')
-
+# TO DO prompt the user to use a shorter time if input is too long
     if webhookEvent['message']['text'].lower().find("longer time") >= 0:
         # print("Enter catch_long_request")
         Facebook.send_message(user.uid, "Nope")
@@ -120,7 +125,7 @@ def catch_long_request(user, webhookEvent):
 
 def ask_for_amount(user, webhookEvent):
     debug('ask_for_amount', 'start')
-
+    # When a budge cycle is finished, 
     if user.user_status != "in_budget_cycle" and webhookEvent['message']['text'].lower().find('week') >= 0 or webhookEvent['message']['text'].lower().find('day') >= 0:
         # print("Enter ask_for_amount")
 
@@ -195,7 +200,8 @@ def initiate_report(user, webhookEvent):
                                   )
                                   + 'Better be more careful next time.')
 
-            user.user_status = 'not_in_budget_cycle'
+            # Change name of status here
+            user.user_status = 'finished_budget_cycle' 
             user.save()
 
         debug('initiate_report', 'end false')
