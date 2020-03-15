@@ -185,7 +185,7 @@ def initiate_report(user, webhookEvent):
         if current_budget.left > 0:
             Facebook.send_message(user.uid,
                                   'Thanks for letting me know. You have ${} left for {} day(s). That\'s ${} per day.'.format(
-                                      current_budget.left, days_left, current_budget.left / days_left
+                                      current_budget.left, days_left, round(current_budget.left / days_left, 2)
                                   ))
 
         else:
