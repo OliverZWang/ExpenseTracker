@@ -97,6 +97,8 @@ def cron():
 
         debug('cron', 'end reminder')
 
+        return 'Success'
+
     elif cron_type == '1':
         debug('cron', 'start reporter')
 
@@ -119,8 +121,13 @@ def cron():
                                   + "You have ${} left for this period, that's ${} per day.".format(budget.left, budget / days_left))
 
         debug('cron', 'end reporter')
+
+        return 'Success'
+
     else:
         warning('cron', 'Unknown cron type: ' + cron_type)
+
+        return 'Unknown cron type: ' + cron_type, 404
 
 
 if __name__ == '__main__':
