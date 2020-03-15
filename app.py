@@ -65,6 +65,11 @@ def cron():
     # 0 reminder, 1 daily reporter
     cron_type = request.args.get('type')
 
+    if cron_type is None:
+        warning('cron', 'Type should not be none')
+
+        return 'Type should not be none', 404
+
     user_collection = db.users
 
     users = user_collection.find({'user_status': 'in_budget_cycle'}, {'uid': 1})
