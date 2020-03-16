@@ -126,7 +126,7 @@ def cron():
 
             Facebook.send_message(user.uid,
                                   "You have spent ${} today. ".format(total)
-                                  + "You have ${} left for this period, that's ${} per day.".format(budget.left, round(budget.left / days_left, 2)))
+                                  + "You have ${} left for this period, that's ${} per day.".format(round(budget.left, 2), round(budget.left / days_left, 2)))
 
         debug('cron', 'end reporter')
 
