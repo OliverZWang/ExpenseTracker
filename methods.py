@@ -124,7 +124,7 @@ def catch_long_request(user, webhookEvent):
     # TO DO prompt the user to use a shorter time if input is too long
     if webhookEvent['message']['text'].lower().find("longer time") >= 0:
         # print("Enter catch_long_request")
-        Facebook.send_message(user.uid, "A budget period that is longer than two weeks is difficult to track. "
+        Facebook.send_message(user.uid, "A budget period longer than two weeks is difficult to track. "
                                         + "We encourage you to choose a shorter period.")
 
         webhookEvent['message']['text'] = 'get started'
