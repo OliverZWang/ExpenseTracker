@@ -125,7 +125,7 @@ def cron():
             days_left = (budget.to_date - datetime.datetime.date(datetime.datetime.now())).days - 1
 
             Facebook.send_message(user.uid,
-                                  "You have spent ${} today. ".format(total)
+                                  "You have spent ${} today. ".format(round(total, 2))
                                   + "You have ${} left for this period, that's ${} per day.".format(round(budget.left, 2), round(budget.left / days_left, 2)))
 
         debug('cron', 'end reporter')
