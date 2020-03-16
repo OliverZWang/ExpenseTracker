@@ -43,6 +43,21 @@ def send_message(uid, msg, quick_replies=None, message_type=None):
     debug('send_message', 'message sent: ' + msg)
 
 
+def sender_action(uid, action='typing_on'):
+    json_data = {
+        'recipient': {
+            'id': uid
+        },
+        'sender_action': action
+    }
+
+    r = requests.post(
+        'https://graph.facebook.com/v2.6/me/messages?access_token=' + os.environ.get('ACCESS_TOKEN', 'DEFAULT_VERIFY_TOKEN'),
+        json=json_data,
+        headers={'Content-type': 'application/json'}
+    )
+
+
 if __name__ == '__main__':
     status, first_name, last_name = get_user('3545504232158581')
     

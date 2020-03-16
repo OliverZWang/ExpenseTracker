@@ -48,6 +48,9 @@ def webhook_post():
                 uid = webhookEvent['sender']['id']
                 
                 user = User(uid)
+
+                Facebook.sender_action(user.uid, 'mark_seen')
+                Facebook.sender_action(user.uid, 'typing_on')
                 
                 for method in method_list:
                     if method(user, webhookEvent):
