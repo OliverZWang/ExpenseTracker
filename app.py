@@ -8,7 +8,7 @@ from Db import db
 app = Flask(__name__)
 
 method_list = [check_new_user, give_intro, catch_long_request, get_length, ask_for_amount,
-               set_amount, initiate_report, catch_all]
+               set_amount, initiate_report, plain_message, catch_all]
 
 
 @app.route('/')
@@ -86,12 +86,12 @@ def cron():
                 quick_replies = [
                     {
                         "content_type": "text",
-                        "title": "Yes, I spent nothing today.",
+                        "title": "I spent nothing today.",
                         "payload": "spent_nothing"
                     },
                     {
                         "content_type": "text",
-                        "title": "No, I will report now!",
+                        "title": "I will report now!",
                         "payload": "report_now"
                     }
                 ]
