@@ -27,7 +27,6 @@ def check_new_user(user, webhookEvent):
         debug('check_new_user', 'end false')
         return False
     else:
-
         debug('check_new_user', 'end true')
         return True
 
@@ -35,7 +34,7 @@ def check_new_user(user, webhookEvent):
 def give_intro(user, webhookEvent):
     debug('give_intro', 'start')
 
-    if webhookEvent['message']['text'].find('What is this') >= 0:
+    if webhookEvent['message']['text'].lower().find('what is this') >= 0:
         # print("Enter give_intro")
         quick_replies = [
             {
@@ -58,8 +57,8 @@ def give_intro(user, webhookEvent):
 
 def get_length(user, webhookEvent):
     debug('get_length', 'start')
-
-    if webhookEvent['message']['text'].lower().find('get started') >= 0:
+    # TO DO: reply differently if user is in_budget_cycle
+    if user.user_status == "not_in_budget_cycle":
         # print("Enter get_length")
         quick_replies = [
             {
@@ -93,11 +92,16 @@ def get_length(user, webhookEvent):
                 # "image_url":""
             }
         ]
-
+        
         Facebook.send_message(user.uid,
-                              "How long is your next budget period?",
-                              quick_replies=quick_replies)
-
+                          "You haven't started a new budget period yet. Let's get to it. How long is your next budget period?",
+                          quick_replies=quick_replies)
+        
+        user.user_status = "asked_for_length"
+        user.save()
+        # else:
+        #     Facebook.send_message(user.uid,
+        #                       "Welcome back! Please begin your report with a dollar sign.")
         debug('get_length', 'end false')
         return False
     else:
@@ -107,7 +111,7 @@ def get_length(user, webhookEvent):
 
 def catch_long_request(user, webhookEvent):
     debug('catch_long_request', 'start')
-
+# TO DO prompt the user to use a shorter time if input is too long
     if webhookEvent['message']['text'].lower().find("longer time") >= 0:
         # print("Enter catch_long_request")
         Facebook.send_message(user.uid, "Nope")
@@ -120,24 +124,61 @@ def catch_long_request(user, webhookEvent):
 
 def ask_for_amount(user, webhookEvent):
     debug('ask_for_amount', 'start')
-
-    if user.user_status != "in_budget_cycle" and webhookEvent['message']['text'].lower().find('week') >= 0 or webhookEvent['message']['text'].lower().find('day') >= 0:
+    # When a budge cycle is finished, 
+    if user.user_status == "asked_for_length":
         # print("Enter ask_for_amount")
+        if webhookEvent['message']['text'].lower().find('week') >= 0 or webhookEvent['message']['text'].lower().find('day') >= 0:
+            length = webhookEvent['message']['text'].split(' ')
+            today = datetime.date.today()
+            period = ''
+            if length[1].find('week') >= 0:
+                period = datetime.timedelta(weeks=int(length[0]))
+            else:
+                period = datetime.timedelta(days=int(length[0]))
+            to_date = today + period
+            # print(to_date)
+            user.add_budget(today, to_date, -1)
 
-        length = webhookEvent['message']['text'].split(' ')
-        today = datetime.date.today()
-        period = ''
-        if length[1].find('week') >= 0:
-            period = datetime.timedelta(weeks=int(length[0]))
+            Facebook.send_message(user.uid,
+                                  "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]))
+            user.user_status = "asked_for_amount"
+            user.save()
         else:
-            period = datetime.timedelta(days=int(length[0]))
-        to_date = today + period
-        # print(to_date)
-        user.add_budget(today, to_date, -1)
-
-        Facebook.send_message(user.uid,
-                              "How much would you like to spend for {} {}? (Please start with a dolar sign)".format(length[0], length[1]))
-
+            quick_replies = [
+            {
+                "content_type": "text",
+                "title": "3 days",
+                "payload": "valid_len",
+                # "image_url":""
+            },
+            {
+                "content_type": "text",
+                "title": "5 days",
+                "payload": "valid_len",
+                # "image_url":""
+            },
+            {
+                "content_type": "text",
+                "title": "1 week",
+                "payload": "valid_len",
+                # "image_url":""
+            },
+            {
+                "content_type": "text",
+                "title": "2 weeks",
+                "payload": "valid_len",
+                # "image_url":""
+            },
+            {
+                "content_type": "text",
+                "title": "A Longer Time? ",
+                "payload": "valid_len",
+                # "image_url":""
+            }
+            ]
+            Facebook.send_message(user.uid,
+                          "You haven't started a budget period yet. Let's get to it. How long is your next budget period?",
+                          quick_replies=quick_replies)
         debug('ask_for_amount', 'end false')
         return False
     else:
@@ -148,20 +189,23 @@ def ask_for_amount(user, webhookEvent):
 def set_amount(user, webhookEvent):
     debug('set_amount', 'start')
 
-    if user.user_status != "in_budget_cycle" and webhookEvent['message']['text'].find('$') >= 0:
-        # print("Enter set_amount")
-        total = float(webhookEvent['message']['text'][1:])
-        # print(total)
+    if user.user_status == "asked_for_amount":
+        if webhookEvent['message']['text'].find('$') >= 0:
+            # print("Enter set_amount")
+            index = webhookEvent['message']['text'].find('$')
+            total = float(webhookEvent['message']['text'][index+1:])
+            # print(total)
 
-        budget = user.get_budgets()[-1]
-        budget.total = total
-        budget.left = total
-        budget.save()
-
-        user.user_status = "in_budget_cycle"
-        user.save()
-
-        Facebook.send_message(user.uid, "Saved")
+            budget = user.get_budgets()[-1]
+            budget.total = total
+            budget.left = total
+            budget.save()
+            Facebook.send_message(user.uid, "Saved. To report an expense, start with a dollar sign and enter an amount. ")
+            user.user_status = "in_budget_cycle"
+            user.save()
+        else:
+            Facebook.send_message(user.uid,
+                                  "You haven't finished setting up your budget period yet. How much would you like to spend? (Please start with a dolar sign)")
 
         debug('set_amount', 'end false')
         return False
@@ -195,7 +239,8 @@ def initiate_report(user, webhookEvent):
                                   )
                                   + 'Better be more careful next time.')
 
-            user.user_status = 'not_in_budget_cycle'
+            # Change name of status here
+            user.user_status = 'not_in_budget_cycle' 
             user.save()
 
         debug('initiate_report', 'end false')
