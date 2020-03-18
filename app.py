@@ -136,6 +136,11 @@ def cron():
         warning('cron', 'Unknown cron type: ' + cron_type)
 
         return 'Unknown cron type: ' + cron_type, 404
+      
+      
+@app.route('/ATriggerVerify.txt')
+def verify():
+  return '31BCE3AA9014CCCECEEBD2347B1ABBBF'
 
 
 if __name__ == '__main__':
