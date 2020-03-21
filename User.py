@@ -24,11 +24,24 @@ class User:
                     'last_name': last_name,
                     'user_status': "new"
                 })
-                
-                self.uid = uid
+
                 self.first_name = first_name
                 self.last_name = last_name
                 self.user_status = "new"
+                self.uid = uid
+
+            else:
+                user_collection.insert_one({
+                    'uid': uid,
+                    'first_name': "",
+                    'last_name': "",
+                    'user_status': "new"
+                })
+
+                self.first_name = ""
+                self.last_name = ""
+                self.user_status = "new"
+                self.uid = uid
                 
         else:
             self.uid = uid
